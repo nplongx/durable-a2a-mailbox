@@ -4,6 +4,10 @@ A small Python library for durable agent-to-agent (A2A) endpoint registration, A
 
 This is a **mailbox persistence component**, not an MCP server, network service, authentication provider, agent scheduler, or ChatGPT tab wake-up mechanism. Here, “A2A” names the source broker's agent-to-agent mailbox feature; this package does not claim full Agent2Agent protocol conformance (Agent Cards, task lifecycle, JSON-RPC endpoints, or streaming transport).
 
+## Terminology
+
+See [TERMINOLOGY.md](TERMINOLOGY.md) for shared identifier, lifecycle, evidence, time-unit, and compatibility conventions.
+
 ## Features
 
 - Per-principal endpoint registration and retirement with retained tombstone history.
