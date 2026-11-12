@@ -66,33 +66,33 @@ Prefer these meanings for new types and fields:
 - reason: concise explanation; callers must not parse it as a stable identifier.
 - message: human-readable diagnostic or message body.
 
-Existing ReviewerStatus, policy_hash, and other versioned/persisted names are compatibility exceptions; keep their semantics documented rather than changing their wire or storage identity in place.
+Existing `ReviewerStatus`, `policy_hash`, and other versioned/persisted names are compatibility exceptions; keep their semantics documented rather than changing their wire or storage identity in place.
 
 ## 5. Identifier, digest, version, and key conventions
 
-- <entity>_id: opaque identifier for an entity. Treat as opaque unless that entity's contract defines a grammar.
-- <entity>_ref: typed reference/locator containing more than a bare identifier.
+- `<entity>_id`: opaque identifier for an entity. Treat as opaque unless that entity's contract defines a grammar.
+- `<entity>_ref`: typed reference/locator containing more than a bare identifier.
 - idempotency_key: caller-supplied stable key used to identify one logical side effect across retries. It is not a request ID or correlation ID.
 - request_id: identity of one request.
 - message_id: identity of one message.
 - correlation_id: groups related requests/messages; it does not deduplicate them.
 - causation_id: identifies the immediate event/request that caused another event, when the protocol models causation explicitly.
-- *_sha256: exact SHA-256 digest/fingerprint, represented in the format required by that contract (normally lowercase hexadecimal).
-- *_digest: algorithm-neutral digest; pair it with an explicit algorithm identifier.
-- *_hash: retain only where required by a versioned wire field, database column, or established compatibility contract. Document the actual algorithm. For new names, prefer *_sha256 when the algorithm is fixed to SHA-256.
-- *_fingerprint: canonical fingerprint/pseudonym with its own stated derivation. Do not assume it is interchangeable with an entity ID or public-key ID.
+- `*_sha256`: exact SHA-256 digest/fingerprint, represented in the format required by that contract (normally lowercase hexadecimal).
+- `*_digest`: algorithm-neutral digest; pair it with an explicit algorithm identifier.
+- `*_hash`: retain only where required by a versioned wire field, database column, or established compatibility contract. Document the actual algorithm. For new names, prefer *_sha256 when the algorithm is fixed to SHA-256.
+- `*_fingerprint`: canonical fingerprint/pseudonym with its own stated derivation. Do not assume it is interchangeable with an entity ID or public-key ID.
 - schema_version: version of a serialized schema.
-- <entity>_version: version of a policy, definition, or entity contract.
-- <entity>_revision: monotonic revision of an evolving aggregate/snapshot.
+- `<entity>_version`: version of a policy, definition, or entity contract.
+- `<entity>_revision`: monotonic revision of an evolving aggregate/snapshot.
 - key_id: identifier of a cryptographic key; not the key material or fingerprint.
 
 ## 6. Time and quantity conventions
 
-- *_at: absolute timestamp. New cross-repository contracts should use RFC 3339 UTC with explicit Z, unless a specific protocol requires another exact representation.
-- *_at_ms: Unix epoch timestamp in milliseconds. Never compare or substitute it directly for an RFC 3339 string without conversion.
-- *_unix_ms: explicitly states Unix epoch milliseconds; retain in existing public structures.
-- *_seconds, *_ms, *_bytes, *_count: include units in quantity names.
-- *_index: position; state whether it is zero-based or one-based in the contract. Internal collection indices are zero-based by default.
+- `*_at`: absolute timestamp. New cross-repository contracts should use RFC 3339 UTC with explicit Z, unless a specific protocol requires another exact representation.
+- `*_at_ms`: Unix epoch timestamp in milliseconds. Never compare or substitute it directly for an RFC 3339 string without conversion.
+- `*_unix_ms`: explicitly states Unix epoch milliseconds; retain in existing public structures.
+- `*_seconds`, `*_ms`, `*_bytes`, `*_count`: include units in quantity names.
+- `*_index`: position; state whether it is zero-based or one-based in the contract. Internal collection indices are zero-based by default.
 - *_count: number of elements, not the final index.
 - Use plural nouns for collections and *_by_<key> for maps indexed by a key.
 
@@ -101,9 +101,9 @@ Existing ReviewerStatus, policy_hash, and other versioned/persisted names are co
 - Rust: UpperCamelCase types/traits, snake_case modules/functions/fields/locals, SCREAMING_SNAKE_CASE constants.
 - JavaScript/TypeScript: camelCase functions/locals and PascalCase types; serialized field names stay contract-defined.
 - Python: snake_case functions/locals/fields and PascalCase types.
-- Prefer role-specific names (workflow_id, provider_run_id, duration_weights) over bare id, value, data, count, status, or result when a name crosses a function or contract boundary.
-- Boolean names should communicate the predicate: is_*, has_*, can_*, or requires_* where natural.
-- Function names: parse_* parses representation, validate_* checks structural/domain constraints, and verify_* evaluates proof/authenticity against explicit trusted inputs. Do not call parsing or digest comparison verification when no trust authority is involved.
+- Prefer role-specific names (`workflow_id`, `provider_run_id`, `duration_weights`) over bare id, value, data, count, status, or result when a name crosses a function or contract boundary.
+- Boolean names should communicate the predicate: `is_*`, `has_*`, `can_*`, or `requires_*` where natural.
+- Function names: `parse_*` parses representation, `validate_*` checks structural/domain constraints, and `verify_*` evaluates proof/authenticity against explicit trusted inputs. Do not call parsing or digest comparison verification when no trust authority is involved.
 
 ## 8. Repository and package naming
 
@@ -119,14 +119,14 @@ Existing ReviewerStatus, policy_hash, and other versioned/persisted names are co
 | workflow-domain | workflow_id, task_id, WorkflowPlan, TaskState, WorkflowState, TaskOutcome. node_* APIs are explicit legacy Node-compatibility projections. |
 | protocol-contracts | Envelope, message_id, message_type, request_id, correlation_id, versioned wire contract. COS-AP v1 job_id, sender, and recipient remain exact wire names. |
 | content-artifacts | ArtifactRefV1, ArtifactManifestV1, ArtifactSourceV1, ArtifactLineageV1, read observation, and disposition. A read observation is not an authorization decision. |
-| linux-project-quota | ProjectQuotaLimits { bytes, inodes }, ProjectQuotaStatus { project_id, bytes_hard_limit, inodes_hard_limit, bytes_used, inodes_used }, and ProjectQuotaController. Filesystem project quota is distinct from cgroup CPU/memory quota. |
-| provider-intent-ledger | ProviderIntentRequest describes the immutable dispatch request, ProviderIntentRecord is the durable record, and ProviderIntentReservation is the reservation result. attempt is the workflow/task attempt ordinal; idempotency_key deduplicates one logical provider effect; provider_run_id identifies the external run. Ledger state is not provider workflow state. |
-| workflow-recovery-policy | StaleWorkflowEvidence is the input; RecoveryDecision is the policy result; RecoveryBlocker explains deferral. The library does not perform recovery, retry, replay, or terminalize a workflow. |
-| durable-a2a-mailbox | AuthenticatedPrincipal is the host-asserted identity, MailboxStore owns mailbox persistence operations, and MailboxLimits bounds resource use. Prefer endpoint_id, sender_endpoint_id, recipient_endpoint_id, message_id, and idempotency_key. “A2A” denotes this mailbox feature, not full Agent2Agent protocol conformance. |
-| adaptive-goal-graph | Goal, Idea, Plan, and Execution are graph-node concepts; graph_revision identifies a graph revision; checkpoint/custody values are external-authority contracts, not local authority. |
+| linux-project-quota | `ProjectQuotaLimits { bytes, inodes }`, `ProjectQuotaStatus { project_id, bytes_hard_limit, inodes_hard_limit, bytes_used, inodes_used }`, and `ProjectQuotaController`. Filesystem project quota is distinct from cgroup CPU/memory quota. |
+| provider-intent-ledger | `ProviderIntentRequest` describes the immutable dispatch request, `ProviderIntentRecord` is the durable record, and `ProviderIntentReservation` is the reservation result. attempt is the workflow/task attempt ordinal; idempotency_key deduplicates one logical provider effect; provider_run_id identifies the external run. Ledger state is not provider workflow state. |
+| workflow-recovery-policy | `StaleWorkflowEvidence` is the input; `RecoveryDecision` is the policy result; `RecoveryBlocker` explains deferral. The library does not perform recovery, retry, replay, or terminalize a workflow. |
+| durable-a2a-mailbox | `AuthenticatedPrincipal` is the host-asserted identity, `MailboxStore` owns mailbox persistence operations, and `MailboxLimits` bounds resource use. Prefer endpoint_id, sender_endpoint_id, recipient_endpoint_id, message_id, and idempotency_key. “A2A” denotes this mailbox feature, not full Agent2Agent protocol conformance. |
+| adaptive-goal-graph | `Goal`, `Idea`, `Plan`, and `Execution` are graph-node concepts; `graph_revision` identifies a graph revision; checkpoint/custody values are external-authority contracts, not local authority. |
 | runalith-github-actions-provider | provider_id, provider_run_id, immutable provider intent, dispatch outcome, and provider observation. A GitHub Actions run is not the internal workflow or task attempt. |
-| runalith-linux-sandbox | CommandRequest, CommandResult, process_id, workspace, and scoped WorkspaceWriteCapability. Process-tree cleanup evidence does not prove remote provider work stopped. |
-| runalith-trust | principal, reviewer subject, issuer, audience, trust_root_sha256, policy_version, and decision. Verification is not application authorization. Existing policy_hash fields/columns are SHA-256 values retained for v1/storage compatibility. |
+| runalith-linux-sandbox | `CommandRequest`, `CommandResult`, `process_id`, `workspace`, and scoped `WorkspaceWriteCapability`. Process-tree cleanup evidence does not prove remote provider work stopped. |
+| runalith-trust | `principal`, reviewer `subject`, `issuer`, `audience`, `trust_root_sha256`, `policy_version`, and `decision`. Verification is not application authorization. Existing `policy_hash` fields/columns are SHA-256 values retained for v1/storage compatibility. |
 | weighted-shard-planner | An item is a named check; a duration_weight is measured duration in seconds; shard_count is a total; internal shard indices are zero-based while parsed CLI index/count selection is one-based. |
 
 ## 10. Compatibility and change policy
