@@ -11,6 +11,14 @@ from durable_a2a_mailbox import AuthenticatedPrincipal, MailboxLimits, MailboxSt
 SECRET = "test-secret-value-that-is-at-least-32-bytes-long"
 
 
+class PackageMetadataTests(unittest.TestCase):
+    def test_packaged_terminology_matches_repository_glossary(self) -> None:
+        repository_root = Path(__file__).resolve().parents[1]
+        repository_glossary = (repository_root / "TERMINOLOGY.md").read_bytes()
+        package_glossary = (repository_root / "durable_a2a_mailbox" / "TERMINOLOGY.md").read_bytes()
+        self.assertEqual(package_glossary, repository_glossary)
+
+
 class MailboxTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()

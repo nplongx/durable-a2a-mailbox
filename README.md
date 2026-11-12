@@ -6,7 +6,7 @@ This is a **mailbox persistence component**, not an MCP server, network service,
 
 ## Terminology
 
-See [TERMINOLOGY.md](TERMINOLOGY.md) for shared identifier, lifecycle, evidence, time-unit, and compatibility conventions.
+See [TERMINOLOGY.md](TERMINOLOGY.md) for shared identifier, lifecycle, evidence, time-unit, and compatibility conventions. The glossary is also installed as `durable_a2a_mailbox/TERMINOLOGY.md` package data.
 
 ## Features
 
@@ -22,7 +22,7 @@ See [TERMINOLOGY.md](TERMINOLOGY.md) for shared identifier, lifecycle, evidence,
 ## Install
 
 ```sh
-python -m pip install "git+https://github.com/nplongx/durable-a2a-mailbox.git@v0.1.0"
+python -m pip install "git+https://github.com/nplongx/durable-a2a-mailbox.git@v0.1.1"
 ```
 
 Runtime uses Python standard library only; no network, web-framework, identity-provider, or application package is required.
@@ -69,7 +69,7 @@ ack = store.ack_message(bob, bob_endpoint["endpoint_id"], message["message_id"])
 
 The database is also an isolation boundary. Principals sharing one database can discover the active endpoint directory and potentially address endpoints when authorized by ACLs. Use a separate database per tenant/security domain when cross-tenant discovery is not intended. Directory labels are owner-supplied metadata and must not be treated as trusted identity claims.
 
-The identity secret must be at least 32 bytes, shared by all instances that need consistent fingerprints/tokens for the same mailbox database, and stored outside the database. The library derives stable HMAC-SHA256 principal fingerprints and endpoint ACL tokens. These values are pseudonyms/compatibility selectors, not authentication credentials. The v1 HMAC derivation namespace is retained exactly so existing fingerprint ACLs remain stable. Changing the secret changes fingerprints and endpoint tokens; plan ACL migration before rotation. The legacy v1 HMAC derivation namespace is retained exactly so existing fingerprint ACLs remain stable; it does not connect to or depend on any broker service.
+The identity secret must be at least 32 bytes, shared by all instances that need consistent fingerprints/tokens for the same mailbox database, and stored outside the database. The library derives stable HMAC-SHA256 principal fingerprints and endpoint ACL tokens. These values are pseudonyms/compatibility selectors, not authentication credentials. The v1 HMAC derivation namespace is retained exactly so existing fingerprint ACLs remain stable; it does not connect to or depend on another service. Changing the secret changes fingerprints and endpoint tokens; plan ACL migration before rotation.
 
 ## Database ownership and operations
 

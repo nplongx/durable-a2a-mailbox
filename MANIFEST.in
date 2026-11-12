@@ -4,4 +4,4 @@ include TERMINOLOGY.md
 include SECURITY.md
 include CONTRIBUTING.md
 include CHANGELOG.md
-recursive-include durable_a2a_mailbox py.typed
+recursive-include durable_a2a_mailbox py.typed TERMINOLOGY.md
