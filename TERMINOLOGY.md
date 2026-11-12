@@ -1,143 +1,130 @@
 # Shared terminology and naming conventions
 
-**Status:** Cross-repository convention for the extracted libraries. This document defines preferred terms for new APIs and documentation. It does not override a repository's versioned wire schema, persisted schema, or domain-specific contract.
+**Status:** Naming standard for this standalone package. The standard applies to new identifiers and documentation. It does not silently rewrite versioned wire fields, signed values, persisted keys, or public compatibility surfaces.
 
-## 1. Core workflow vocabulary
+## 1. Workflow vocabulary
 
-| Term | Canonical meaning | Naming |
+| Term | Meaning | Preferred name |
 |---|---|---|
-| Workflow | A bounded business process containing tasks and governed by one workflow identity. | workflow_id |
-| Task | A bounded unit of work within a workflow. | task_id |
-| Attempt | One numbered execution or delivery try within its owning scope. Attempt numbers are positive and normally start at 1. | attempt; use a scope-specific name such as delivery_attempt when needed |
-| Attempt identity | Stable identity for one particular attempt, distinct from its ordinal. | attempt_id |
-| Execution | A host/runtime execution aggregate. Do not use it as a synonym for a provider run or OS process. | execution_id when an identity is needed |
-| Provider run | A run created and identified by an external provider. | provider_run_id |
-| Worker | A logical execution actor. It is not an OS process. | worker_id |
-| Job | Legacy source or wire vocabulary. New generic contracts use workflow. | Preserve legacy job_id only where compatibility requires it. |
+| Workflow | Bounded process containing declared tasks. | workflow_id |
+| Task | Bounded unit of work in a workflow. | task_id |
+| Attempt | Positive ordinal for one execution/delivery try within its owner scope. | attempt; use delivery_attempt when ambiguous |
+| Attempt identity | Stable identity for a specific attempt, not its ordinal. | attempt_id |
+| Execution | Host/runtime execution aggregate, not an OS process or provider run. | execution_id |
+| Provider run | External run created by a provider. | provider_run_id |
+| Worker | Logical execution actor, not an OS process. | worker_id |
+| Job | Legacy compatibility term. New generic APIs prefer workflow. | Preserve job_id only for compatibility. |
 
-The COS-AP v1 envelope's job_id and Node-compatibility structures' job_id are deliberate compatibility names. Do not silently rename them to workflow_id; map them explicitly at an adapter boundary.
+Legacy job_id fields remain isolated at compatibility boundaries. New domain fields should use workflow_id.
 
-## 2. Identity and actor vocabulary
+## 2. Identity vocabulary
 
 | Term | Meaning |
 |---|---|
 | Principal | Caller identity asserted by an already-authenticated host or transport. A value object does not authenticate its contents. |
-| Subject | The identity or entity named by a claim, attestation, approval, or evidence statement. |
-| Actor | The party that performed or requested an action. Use a specific identity field where possible. |
-| Producer | The party or service that declares it created an artifact or evidence item. Producer metadata is a claim until authenticated. |
-| Issuer | The party that issues a signed statement or token. |
-| Audience | The intended recipient or service boundary for a statement. |
-| Sender / recipient | Message-routing participants. Use endpoint-specific identifiers when routing to mailbox endpoints. |
-| Reviewer | An identity participating in a review decision under an explicit policy. |
+| Subject | Identity or entity named by a claim, attestation, approval, or evidence statement. |
+| Actor | Party that performed or requested an action. |
+| Producer | Party or service declaring that it created an artifact or evidence item. This is a claim until authenticated. |
+| Issuer | Party that issues a signed statement or token. |
+| Audience | Intended recipient or service boundary. |
+| Sender / recipient | Message-routing participants. Use endpoint-specific identifiers when applicable. |
+| Reviewer | Identity participating in a decision under an explicit policy. |
 
-These roles are not interchangeable. A principal may act as a producer, but that relationship must be supplied and verified by the owning host.
+These roles are not interchangeable. A principal may act as a producer, but the relationship must be established by the owning host.
 
-## 3. Data, evidence, and authority vocabulary
+## 3. Evidence and authority vocabulary
 
-| Term | Canonical meaning |
+| Term | Meaning |
 |---|---|
 | Artifact | Exact bytes plus a content identity. |
-| Artifact reference | Typed locator/binding for an artifact; not the artifact bytes themselves. |
-| Manifest | Immutable, canonical grouping of artifact references and lineage claims. |
-| Evidence | Material or an observation offered to support a proposition or decision. Evidence may reference artifacts. |
-| Observation | A time-bounded report from a named observer/source. It is not, by itself, proof of truth or authority. |
+| Artifact reference | Typed locator/binding for an artifact, not the bytes themselves. |
+| Manifest | Canonical grouping of artifact references and lineage claims. |
+| Evidence | Material or observation offered to support a proposition or decision. |
+| Observation | Time-bounded report from a named observer/source; not proof of truth or authority by itself. |
 | Verification | Evaluation of evidence against explicit rules and trusted inputs. |
-| Attestation | An assertion bound to an issuer and usually a signature. A parsed attestation is not automatically trusted. |
-| Receipt | A record of a request, delivery, or decision. Its authority depends on authentication, binding, and custody checks. |
-| Policy | Versioned rules and constraints supplied to an evaluator. A policy value is not itself authorization. |
-| Decision | The result returned by an authorized policy evaluator. |
-| Authorization | An authority decision enforced by the owning host. Structural validation, a digest, or a local capability-shaped value is not authorization. |
-| Capability | A scoped token/value representing permission issued by an authority. Its validity depends on the issuer and enforcement boundary. |
+| Attestation | Assertion bound to an issuer and usually a signature; parsing does not make it trusted. |
+| Receipt | Record of a request, delivery, or decision; authority depends on authentication, binding, and custody. |
+| Policy | Versioned rules supplied to an evaluator; policy data is not authorization. |
+| Decision | Result returned by a policy evaluator with the required authority. |
+| Authorization | Authority decision enforced by the owning host. Validation, hashing, and capability-shaped values do not create authorization. |
+| Capability | Scoped permission value issued by an authority and enforced at its boundary. |
 
-A digest proves content identity under its algorithm and serialization rules. It does not prove authorship, truth, approval, custody, or authorization.
+A digest establishes content identity under a specific algorithm and serialization rule. It does not establish authorship, truth, approval, custody, or authorization.
 
 ## 4. Lifecycle and result vocabulary
 
-Prefer these meanings for new types and fields:
+Prefer distinct meanings for new fields:
 
 - state: lifecycle position of a durable entity or aggregate.
-- status: reported condition of an external resource, service, or compatibility record. Do not use it as a vague synonym for every result.
-- outcome: observed result of an attempted operation (for example, accepted, rejected, not sent, or unknown).
-- decision: policy or governance result (for example, approve, reject, or abstain).
-- disposition: classification of an observation or lookup result (for example, available, not found, or unavailable).
-- classification / class: category used to group failures or evidence.
-- reason_code: stable machine-readable cause for a negative/uncertain outcome.
+- status: reported condition of an external resource or service.
+- outcome: observed result of an attempted operation.
+- decision: policy/governance result.
+- disposition: classification of an observation or lookup result.
+- classification: category used to group evidence or failures.
+- reason_code: stable machine-readable cause for a negative or uncertain outcome.
 - code / error_code: stable machine-readable error identifier.
-- reason: concise explanation; callers must not parse it as a stable identifier.
+- reason: explanatory text; never parse it as a stable identifier.
 - message: human-readable diagnostic or message body.
 
-Existing `ReviewerStatus`, `policy_hash`, and other versioned/persisted names are compatibility exceptions; keep their semantics documented rather than changing their wire or storage identity in place.
+Do not use status, state, outcome, decision, and disposition as interchangeable synonyms.
 
-## 5. Identifier, digest, version, and key conventions
+## 5. Identifiers, digests, versions, and keys
 
-- `<entity>_id`: opaque identifier for an entity. Treat as opaque unless that entity's contract defines a grammar.
+- `<entity>_id`: opaque identifier; validate its grammar only when the owning contract defines one.
 - `<entity>_ref`: typed reference/locator containing more than a bare identifier.
-- idempotency_key: caller-supplied stable key used to identify one logical side effect across retries. It is not a request ID or correlation ID.
-- request_id: identity of one request.
-- message_id: identity of one message.
-- correlation_id: groups related requests/messages; it does not deduplicate them.
-- causation_id: identifies the immediate event/request that caused another event, when the protocol models causation explicitly.
-- `*_sha256`: exact SHA-256 digest/fingerprint, represented in the format required by that contract (normally lowercase hexadecimal).
-- `*_digest`: algorithm-neutral digest; pair it with an explicit algorithm identifier.
-- `*_hash`: retain only where required by a versioned wire field, database column, or established compatibility contract. Document the actual algorithm. For new names, prefer *_sha256 when the algorithm is fixed to SHA-256.
-- `*_fingerprint`: canonical fingerprint/pseudonym with its own stated derivation. Do not assume it is interchangeable with an entity ID or public-key ID.
-- schema_version: version of a serialized schema.
-- `<entity>_version`: version of a policy, definition, or entity contract.
-- `<entity>_revision`: monotonic revision of an evolving aggregate/snapshot.
-- key_id: identifier of a cryptographic key; not the key material or fingerprint.
+- `idempotency_key`: stable key for one logical side effect across retries; not a request ID or correlation ID.
+- `request_id`: identity of one request.
+- `message_id`: identity of one message.
+- `correlation_id`: groups related messages; does not deduplicate them.
+- `causation_id`: immediate causal event/request identifier when the contract models causation.
+- `*_sha256`: fixed SHA-256 digest/fingerprint in the exact representation defined by the contract.
+- `*_digest`: algorithm-neutral digest; specify the algorithm separately.
+- `*_hash`: retain for existing versioned fields/storage columns; document its actual algorithm. New fixed-SHA-256 fields prefer `*_sha256`.
+- `*_fingerprint`: derived pseudonym/fingerprint with a stated derivation, distinct from entity IDs and key IDs.
+- `schema_version`: serialized schema version.
+- `<entity>_version`: policy/definition version.
+- `<entity>_revision`: monotonic aggregate/snapshot revision.
+- `key_id`: key identifier, not key material or fingerprint.
 
-## 6. Time and quantity conventions
+## 6. Time and quantities
 
-- `*_at`: absolute timestamp. New cross-repository contracts should use RFC 3339 UTC with explicit Z, unless a specific protocol requires another exact representation.
-- `*_at_ms`: Unix epoch timestamp in milliseconds. Never compare or substitute it directly for an RFC 3339 string without conversion.
-- `*_unix_ms`: explicitly states Unix epoch milliseconds; retain in existing public structures.
+- `*_at`: absolute timestamp; new cross-boundary contracts prefer RFC 3339 UTC with explicit `Z`.
+- `*_at_ms` / `*_unix_ms`: Unix epoch milliseconds. Never compare directly with RFC 3339 text.
 - `*_seconds`, `*_ms`, `*_bytes`, `*_count`: include units in quantity names.
-- `*_index`: position; state whether it is zero-based or one-based in the contract. Internal collection indices are zero-based by default.
-- *_count: number of elements, not the final index.
-- Use plural nouns for collections and *_by_<key> for maps indexed by a key.
+- `*_index`: position; explicitly state zero-based or one-based. Internal collection indices default to zero-based.
+- `*_count`: number of entries, not final index.
+- Use plural nouns for collections and `*_by_<key>` for maps indexed by a key.
 
-## 7. Language-level naming
+## 7. Language conventions
 
-- Rust: UpperCamelCase types/traits, snake_case modules/functions/fields/locals, SCREAMING_SNAKE_CASE constants.
-- JavaScript/TypeScript: camelCase functions/locals and PascalCase types; serialized field names stay contract-defined.
-- Python: snake_case functions/locals/fields and PascalCase types.
-- Prefer role-specific names (`workflow_id`, `provider_run_id`, `duration_weights`) over bare id, value, data, count, status, or result when a name crosses a function or contract boundary.
-- Boolean names should communicate the predicate: `is_*`, `has_*`, `can_*`, or `requires_*` where natural.
-- Function names: `parse_*` parses representation, `validate_*` checks structural/domain constraints, and `verify_*` evaluates proof/authenticity against explicit trusted inputs. Do not call parsing or digest comparison verification when no trust authority is involved.
+- Rust: `UpperCamelCase` types/traits, `snake_case` modules/functions/fields/locals, `SCREAMING_SNAKE_CASE` constants.
+- JavaScript/TypeScript: `camelCase` functions/locals and `PascalCase` types.
+- Python: `snake_case` functions/locals/fields and `PascalCase` types.
+- Prefer role-specific names (`workflow_id`, `provider_run_id`, `duration_weights`) over bare `id`, `value`, `data`, `count`, `status`, or `result` at API boundaries.
+- Boolean names should state predicates: `is_*`, `has_*`, `can_*`, `requires_*`.
+- `parse_*` parses representation; `validate_*` checks structural/domain rules; `verify_*` evaluates proof/authenticity against explicit trusted inputs.
 
-## 8. Repository and package naming
+## 8. Repository and package names
 
-- Repository and package slugs use lowercase kebab-case; Rust import paths use the corresponding snake_case crate name.
-- Prefer a capability-oriented name: domain or platform qualifier plus the bounded capability (for example, linux-project-quota or weighted-shard-planner). Avoid embedding a parent application's internal module path in a reusable package name.
-- Retain a source-ecosystem prefix such as runalith- only while the extracted contract, persisted identifiers, or public semantics remain specific to that ecosystem. Do not remove the prefix mechanically: a GitHub rename can leave database identifiers, protocol names, dependency URLs, and documented provenance inconsistent.
-- New variable and field names should describe the entity/role and include units or scope where ambiguity is possible. Generic names such as value, data, id, count, and result are acceptable only inside a narrow local scope where the type and role are obvious.
+- Package/repository slugs use lowercase kebab-case; Rust crate identifiers use the corresponding snake_case form.
+- Use a capability-oriented name: platform/domain qualifier plus bounded capability.
+- Do not inherit a parent product/application name in a reusable package name.
+- Avoid naming public packages after source-tree directories, internal teams, deployment units, or runtime services.
+- The repository must be buildable from its own checkout. Dependencies copied under `vendor/` are internal source, not external repository dependencies.
 
-## 9. Repository-specific vocabulary
+## 9. Package-specific scope
 
-| Repository | Preferred concept names and distinctions |
-|---|---|
-| workflow-domain | workflow_id, task_id, WorkflowPlan, TaskState, WorkflowState, TaskOutcome. node_* APIs are explicit legacy Node-compatibility projections. |
-| protocol-contracts | Envelope, message_id, message_type, request_id, correlation_id, versioned wire contract. COS-AP v1 job_id, sender, and recipient remain exact wire names. |
-| content-artifacts | ArtifactRefV1, ArtifactManifestV1, ArtifactSourceV1, ArtifactLineageV1, read observation, and disposition. A read observation is not an authorization decision. |
-| linux-project-quota | `ProjectQuotaLimits { bytes, inodes }`, `ProjectQuotaStatus { project_id, bytes_hard_limit, inodes_hard_limit, bytes_used, inodes_used }`, and `ProjectQuotaController`. Filesystem project quota is distinct from cgroup CPU/memory quota. |
-| provider-intent-ledger | `ProviderIntentRequest` describes the immutable dispatch request, `ProviderIntentRecord` is the durable record, and `ProviderIntentReservation` is the reservation result. attempt is the workflow/task attempt ordinal; idempotency_key deduplicates one logical provider effect; provider_run_id identifies the external run. Ledger state is not provider workflow state. |
-| workflow-recovery-policy | `StaleWorkflowEvidence` is the input; `RecoveryDecision` is the policy result; `RecoveryBlocker` explains deferral. The library does not perform recovery, retry, replay, or terminalize a workflow. |
-| durable-a2a-mailbox | `AuthenticatedPrincipal` is the host-asserted identity, `MailboxStore` owns mailbox persistence operations, and `MailboxLimits` bounds resource use. Prefer endpoint_id, sender_endpoint_id, recipient_endpoint_id, message_id, and idempotency_key. “A2A” denotes this mailbox feature, not full Agent2Agent protocol conformance. |
-| adaptive-goal-graph | `Goal`, `Idea`, `Plan`, and `Execution` are graph-node concepts; `graph_revision` identifies a graph revision; checkpoint/custody values are external-authority contracts, not local authority. |
-| runalith-github-actions-provider | provider_id, provider_run_id, immutable provider intent, dispatch outcome, and provider observation. A GitHub Actions run is not the internal workflow or task attempt. |
-| runalith-linux-sandbox | `CommandRequest`, `CommandResult`, `process_id`, `workspace`, and scoped `WorkspaceWriteCapability`. Process-tree cleanup evidence does not prove remote provider work stopped. |
-| runalith-trust | `principal`, reviewer `subject`, `issuer`, `audience`, `trust_root_sha256`, `policy_version`, and `decision`. Verification is not application authorization. Existing `policy_hash` fields/columns are SHA-256 values retained for v1/storage compatibility. |
-| weighted-shard-planner | An item is a named check; a duration_weight is measured duration in seconds; shard_count is a total; internal shard indices are zero-based while parsed CLI index/count selection is one-based. |
+This package owns SQLite mailbox endpoints, ACLs, message lifecycle, idempotency, and atomic replies. A2A here means mailbox messaging, not complete Agent2Agent protocol or transport conformance.
 
 ## 10. Compatibility and change policy
 
-Names in a public wire contract, signed payload, canonical JSON representation, database schema, event discriminator, environment variable, or documented public API are compatibility surfaces. Do not rename them in place merely to satisfy style consistency.
+Public wire fields, signed payloads, canonical JSON, database schemas, event discriminators, environment variables, and exported APIs are compatibility surfaces. Do not rename them in place merely for style.
 
 For a compatibility-sensitive name:
-1. Keep the serialized/persisted identifier unchanged.
-2. Use a clearer local variable, accessor, wrapper, or adapter name where safe.
-3. For a new wire or storage contract, choose the canonical names above.
-4. If an old contract must change, introduce a new schema/version and an explicit migration/translation path.
-5. Add tests proving old representations remain byte-for-byte or behaviorally compatible where required.
+1. Keep serialized/persisted identifiers unchanged when existing consumers may rely on them.
+2. Use clearer local names, accessors, wrappers, or adapters where safe.
+3. Introduce a new schema/version for generic replacements of legacy wire or storage values.
+4. Provide an explicit migration/translation path before retiring the old form.
+5. Test exact legacy bytes/behavior and generic forms independently.
 
-This document standardizes new naming and explains legacy exceptions. It does not itself change protocol, database, authorization, or execution semantics.
+This document establishes naming rules; it does not authorize protocol, storage, trust, or execution changes by itself.

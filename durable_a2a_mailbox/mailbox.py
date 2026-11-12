@@ -14,6 +14,10 @@ from typing import Any, Iterator
 from uuid import UUID, uuid4
 
 
+# V1 derivation namespace retained so existing fingerprint ACLs remain stable.
+_LEGACY_IDENTITY_FINGERPRINT_DOMAIN_V1 = b"cos-control-broker/identity-fingerprint/key/v1"
+
+
 @dataclass(frozen=True, slots=True)
 class AuthenticatedPrincipal:
     """Identity asserted by a host after successful authentication."""
@@ -192,7 +196,7 @@ class MailboxStore:
         owner_id = self._require_principal(principal)
         fingerprint_key = hmac.new(
             self._identity_secret,
-            b"cos-control-broker/identity-fingerprint/key/v1",
+            _LEGACY_IDENTITY_FINGERPRINT_DOMAIN_V1,
             hashlib.sha256,
         ).digest()
         return hmac.new(fingerprint_key, owner_id.encode("utf-8"), hashlib.sha256).hexdigest()
